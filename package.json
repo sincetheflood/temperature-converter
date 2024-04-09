@@ -1,0 +1,16 @@
+{
+  "name": "recollections",
+  "version": "1.0.0",
+  "description": "Discord bot that sends reminders",
+  "homepage": "https://github.com/sincetheflood/recollections#readme",
+  "license": "EUPL-1.2",
+  "author": {
+    "name": "Ophelia Rozniak",
+    "email": "dev@ophelia.ink"
+  },
+  "type": "module",
+  "main": "src/index.js",
+  "dependencies": {
+    "discord.js": "^14.14.1"
+  }
+}
