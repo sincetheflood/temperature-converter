@@ -1,18 +1,13 @@
 import { Events } from "discord.js";
 
-function convertTemperature(originalUnit, originalValue) {
-	let convertedValue = "";
+function toCelsius(fahrenheitTemperature) {
+	const celsiusTemperature = (fahrenheitTemperature - 32) / 1.8;
+	return Math.round(celsiusTemperature * 10) / 10;
+}
 
-	switch (originalUnit) {
-		case "c":
-			convertedValue = (originalValue * 1.8) + 32;
-			break;
-		case "f":
-			convertedValue = (originalValue - 32) / 1.8;
-			break;
-	}
-
-	return convertedValue.toPrecision(2);
+function toFahrenheit(celsiusTemperature) {
+	const fahrenheitTemperature = (celsiusTemperature * 1.8) + 32;
+	return Math.round(fahrenheitTemperature * 10) / 10;
 }
 
 export const messageCreate = {
@@ -22,25 +17,29 @@ export const messageCreate = {
 		if (message.author.bot) return;
 
 		try {
-			const response = [];
 			const messageArray = message.content.split(" ");
 
-			messageArray.forEach((el) => {
-				const match = el.match(/(?<value>\d+)(?<unit>[cf])/i);
+			const regexp = /^(?<value>-?\d+)(?<unit>[cf])$/i;
 
-				if (!match) return;
+			const temperatures = messageArray.filter(e => regexp.test(e));
+
+			if (temperatures.length === 0) return;
+
+			const conversionMessages= temperatures.map((e) => {
+				const match = regexp.exec(e);
 
 				switch (match.groups.unit) {
-					case "c":
-						response.push(`${match.input} is ${convertTemperature("c", match.groups.value)}f`);
-						break;
-					case "f":
-						response.push(`${match.input} is ${convertTemperature("f", match.groups.value)}c`);
-						break;
+					case "c": // Temperature was given in Celsius and should be converted to Fahrenheit
+						return `${match.input} is ${toFahrenheit(match.groups.value)}f`;
+					case "f": // Temperature was given in Fahrenheit and should be converted to Celsius
+						return `${match.input} is ${toCelsius(match.groups.value)}c`;
 				}
 			});
 
-			await message.reply(response.join("\n"));
+			await message.reply({
+				content: conversionMessages.join("\n"), 
+				allowedMentions: { repliedUser: false },
+			});
 		} catch (e) {
 			console.error(e);
 		}
